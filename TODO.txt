@@ -1,0 +1,4 @@
+Poner la lista que muestre top 10 de un dia anterior, no hoy, para no estar modificando tanto las tablas
+Afinar funciones Anexadas de modificando y hacer Utyls.py para esas funciones
+probar y corregir errores
+documentar
