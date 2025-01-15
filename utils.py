@@ -1,0 +1,111 @@
+from datetime import datetime, timedelta
+
+def select_time_frame():
+    """
+    Prompts the user to select a time frame and returns the relevant date(s).
+    """
+    print("Select the time frame:")
+    print("1. By Day (Today, Yesterday, etc.)")
+    print("2. By Range (Last 7 days, Last 14 days, Custom Range)")
+    print("3. By Month (This Month, Last Month, Custom Month)")
+    print("4. By Year (This Year, Last Year, Custom Year)")
+
+    choice = input("Enter your choice: ")
+
+    if choice == "1":
+        print("1. Today")
+        print("2. Yesterday")
+        print("3. Two Days Ago")
+        print("4. Three Days Ago")
+        print("5. Enter Specific Date")
+        sub_choice = input("Select an option: ")
+
+        if sub_choice == "1":
+            return [datetime.now().strftime("%Y-%m-%d")]
+        elif sub_choice == "2":
+            return [(datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d")]
+        elif sub_choice == "3":
+            return [(datetime.now() - timedelta(days=2)).strftime("%Y-%m-%d")]
+        elif sub_choice == "4":
+            return [(datetime.now() - timedelta(days=3)).strftime("%Y-%m-%d")]
+        elif sub_choice == "5":
+            date = input("Enter the specific date (YYYY-MM-DD): ")
+            return [date]
+
+    elif choice == "2":
+        print("1. Last 7 Days")
+        print("2. Last 14 Days")
+        print("3. Enter Custom Range")
+        sub_choice = input("Select an option: ")
+
+        if sub_choice == "1":
+            return [(datetime.now() - timedelta(days=i)).strftime("%Y-%m-%d") for i in range(7)]
+        elif sub_choice == "2":
+            return [(datetime.now() - timedelta(days=i)).strftime("%Y-%m-%d") for i in range(14)]
+        elif sub_choice == "3":
+            start_date = input("Enter start date (YYYY-MM-DD): ")
+            end_date = input("Enter end date (YYYY-MM-DD): ")
+            start = datetime.strptime(start_date, "%Y-%m-%d")
+            end = datetime.strptime(end_date, "%Y-%m-%d")
+            return [(start + timedelta(days=i)).strftime("%Y-%m-%d") for i in range((end - start).days + 1)]
+
+    elif choice == "3":
+        print("1. This Month")
+        print("2. Last Month")
+        print("3. Enter Custom Month")
+        sub_choice = input("Select an option: ")
+
+        if sub_choice == "1":
+            today = datetime.now()
+            start = today.replace(day=1)
+            end = (start + timedelta(days=32)).replace(day=1) - timedelta(days=1)
+            return [(start + timedelta(days=i)).strftime("%Y-%m-%d") for i in range((end - start).days + 1)]
+        elif sub_choice == "2":
+            today = datetime.now()
+            start = (today.replace(day=1) - timedelta(days=1)).replace(day=1)
+            end = today.replace(day=1) - timedelta(days=1)
+            return [(start + timedelta(days=i)).strftime("%Y-%m-%d") for i in range((end - start).days + 1)]
+        elif sub_choice == "3":
+            month = input("Enter the month (YYYY-MM): ")
+            start = datetime.strptime(month, "%Y-%m").replace(day=1)
+            end = (start + timedelta(days=32)).replace(day=1) - timedelta(days=1)
+            return [(start + timedelta(days=i)).strftime("%Y-%m-%d") for i in range((end - start).days + 1)]
+
+    elif choice == "4":
+        print("1. This Year")
+        print("2. Last Year")
+        print("3. Enter Custom Year")
+        sub_choice = input("Select an option: ")
+
+        if sub_choice == "1":
+            today = datetime.now()
+            start = today.replace(month=1, day=1)
+            end = today.replace(month=12, day=31)
+            return [(start + timedelta(days=i)).strftime("%Y-%m-%d") for i in range((end - start).days + 1)]
+        elif sub_choice == "2":
+            today = datetime.now()
+            start = today.replace(year=today.year - 1, month=1, day=1)
+            end = today.replace(year=today.year - 1, month=12, day=31)
+            return [(start + timedelta(days=i)).strftime("%Y-%m-%d") for i in range((end - start).days + 1)]
+        elif sub_choice == "3":
+            year = input("Enter the year (YYYY): ")
+            start = datetime.strptime(year, "%Y").replace(month=1, day=1)
+            end = datetime.strptime(year, "%Y").replace(month=12, day=31)
+            return [(start + timedelta(days=i)).strftime("%Y-%m-%d") for i in range((end - start).days + 1)]
+
+    print("Invalid choice. Please try again.")
+    return []
+
+def generate_table(data, columns, summary=False):
+    """
+    Generates a formatted table for display or reports.
+    """
+    from tabulate import tabulate  # Optional library for pretty tables
+
+    if summary:
+        print(f"Total videos: {len(data)}")
+        print(f"Average Views: {sum(row[4] for row in data) / len(data):.2f}")
+        print(f"Average Likes: {sum(row[5] for row in data) / len(data):.2f}")
+
+    table = [tuple(row[i] for i in columns) for row in data]
+    print(tabulate(table, headers=["ID", "Title", "Views"], tablefmt="pretty"))
