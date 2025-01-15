@@ -4,7 +4,7 @@ def select_time_frame():
     """
     Prompts the user to select a time frame and returns the relevant date(s).
     """
-    print("Select the time frame:")
+    print("\nSelect the time frame:")
     print("1. By Day (Today, Yesterday, etc.)")
     print("2. By Range (Last 7 days, Last 14 days, Custom Range)")
     print("3. By Month (This Month, Last Month, Custom Month)")

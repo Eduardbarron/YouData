@@ -1,9 +1,16 @@
 from googleapiclient.discovery import build
 import pandas as pd
 from datetime import datetime, timedelta
-import sqlite3
 from utils import select_time_frame, generate_table
-from db_utils import insert_video, fetch_videos_by_date, fetch_all_videos, insert_channel, fetch_all_channels, set_active_channel, fetch_active_channel
+from db_utils import (
+    insert_video,
+    fetch_videos_by_date,
+    insert_channel,
+    fetch_all_channels,
+    set_active_channel,
+    fetch_active_channel,
+)
+
 
 def fetch_and_store_videos(channel_id, date):
     """
@@ -22,7 +29,7 @@ def fetch_and_store_videos(channel_id, date):
             channelId=channel_id,
             publishedAfter=f"{date}T00:00:00Z",
             publishedBefore=f"{date}T23:59:59Z",
-            maxResults=50
+            maxResults=50,
         )
         response = request.execute()
 
@@ -31,10 +38,9 @@ def fetch_and_store_videos(channel_id, date):
             if not video_id:
                 continue
 
-            video_details = youtube.videos().list(
-                part="snippet,statistics",
-                id=video_id
-            ).execute()
+            video_details = (
+                youtube.videos().list(part="snippet,statistics", id=video_id).execute()
+            )
 
             for video in video_details.get("items", []):
                 video_data = (
@@ -47,7 +53,7 @@ def fetch_and_store_videos(channel_id, date):
                     video["snippet"]["publishedAt"].split("T")[1][:5],
                     video["snippet"].get("description", ""),
                     video["snippet"]["thumbnails"]["default"]["url"],
-                    video["snippet"]["channelTitle"]
+                    video["snippet"]["channelTitle"],
                 )
                 insert_video(video_data)
 
@@ -56,18 +62,21 @@ def fetch_and_store_videos(channel_id, date):
     except Exception as e:
         print(f"An error occurred while fetching and storing videos: {e}")
 
+
 def download_data(channel_id):
     """
     Handles the downloading of video data for a user-defined time frame.
     """
-    dates = select_time_frame()
+    print("\nStarting data download process...")
+    dates = select_time_frame()  # This should show the selection menu
     if dates:
         for date in dates:
             print(f"Downloading data for {date}...")
             fetch_and_store_videos(channel_id, date)
         print("Download complete.")
     else:
-        print("No valid dates selected.")
+        print("No valid dates selected. Returning to main menu.")
+
 
 def generate_report(date):
     """
@@ -78,7 +87,18 @@ def generate_report(date):
 
     if videos:
         # Create a DataFrame from the database results
-        columns = ["ID", "Title", "Views", "Likes", "Comments", "Publication Date", "Publication Hour", "Description", "Thumbnail", "Channel"]
+        columns = [
+            "ID",
+            "Title",
+            "Views",
+            "Likes",
+            "Comments",
+            "Publication Date",
+            "Publication Hour",
+            "Description",
+            "Thumbnail",
+            "Channel",
+        ]
         df = pd.DataFrame(videos, columns=columns)
         df = df.sort_values(by="Views", ascending=False).head(10)
 
@@ -139,6 +159,7 @@ def configure_channel():
         else:
             print("Invalid choice. Please try again.")
 
+
 def display_yesterday_top_videos():
     """
     Fetches and displays the top 10 videos from yesterday, ranked by views/hour.
@@ -166,51 +187,59 @@ def display_yesterday_top_videos():
 
 
 def main():
-    today = datetime.now().strftime("%Y-%m-%d")
-    print(f"\n📊 Welcome to YouData! Today is {today}.")
-
-    active_channel = fetch_active_channel()
-    if active_channel:
-        print()
-        print(f"🎥 Active Channel: {active_channel[2]}")
-    else:
-        print("No active channel. Please configure a channel.")
-
-    display_yesterday_top_videos()
-
     while True:
+
+        today = datetime.now().strftime("%Y-%m-%d")
+        print(f"\n📊 Welcome to YouData! Today is {today}.")
+
+        active_channel = fetch_active_channel()
+        if active_channel:
+            print(
+                f"\n🎥 Active Channel: {active_channel[2]} (YouTube ID: {active_channel[0]})"
+            )
+        else:
+            print("No active channel. Please configure a channel.")
+
+        display_yesterday_top_videos()
+
         print("\n🤖 YouData - Main Menu")
-        print()
-        print("1. Download Video Data")
+        print("\n1. Download Video Data")
         print("2. Consult Top Videos by Date")
         print("3. Generate Excel Report by Date")
         print("4. Change Channel Configuration")
         print("5. Exit")
-        print()
 
-        choice = input("Enter your choice: ")
+        choice = input("\nEnter your choice: ")
 
         if choice == "1":
             if active_channel:
-                date = input("Enter the date to download data for (YYYY-MM-DD): ")
-                fetch_and_store_videos(active_channel[1], date)
+                download_data(active_channel[0])
             else:
                 print("No active channel. Please configure a channel first.")
 
         elif choice == "2":
-            date = input("Enter the date to consult (YYYY-MM-DD): ")
-            videos = fetch_videos_by_date(date)
-            if videos:
-                videos = sorted(videos, key=lambda x: x[2], reverse=True)[:10]  # Sort by views
-                print("\nTop 10 Videos:")
-                for idx, video in enumerate(videos, start=1):
-                    print(f"{idx}. {video[1]} - {video[2]} views")
+            dates = select_time_frame()
+            if dates:
+                all_videos = []
+                for date in dates:
+                    videos = fetch_videos_by_date(date)
+                    if videos:
+                        all_videos.extend(videos)
+
+                if all_videos:
+                    generate_table(all_videos, columns=[0, 1, 2], summary=True)
+                else:
+                    print("No videos found for the selected dates.")
             else:
-                print("No videos found for the specified date.")
+                print("No valid date selected.")
 
         elif choice == "3":
-            date = input("Enter the date to generate a report for (YYYY-MM-DD): ")
-            generate_report(date)
+            dates = select_time_frame()
+            if dates:
+                for date in dates:
+                    generate_report(date)
+            else:
+                print("No valid dates selected.")
 
         elif choice == "4":
             configure_channel()
@@ -221,6 +250,7 @@ def main():
 
         else:
             print("Invalid choice. Please select an option from the menu.")
+
 
 if __name__ == "__main__":
     main()

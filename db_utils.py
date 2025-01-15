@@ -29,17 +29,6 @@ def fetch_videos_by_date(publication_date):
     conn.close()
     return results
 
-def fetch_all_videos():
-    """
-    Fetches all video records from the database.
-    Returns a list of tuples containing all video data.
-    """
-    conn = sqlite3.connect(DB_PATH)
-    cursor = conn.cursor()
-    cursor.execute('SELECT * FROM videos')
-    results = cursor.fetchall()
-    conn.close()
-    return results
 
 def insert_channel(channel_data):
     """
@@ -90,15 +79,3 @@ def fetch_active_channel():
     conn.close()
     return result
 
-if __name__ == "__main__":
-    # Example usage of the functions
-    sample_video = ("12345", "Sample Video", 1000, 100, 50, "2025-01-08", "12:00", "This is a description", "https://example.com/thumbnail.jpg", "Sample Channel")
-    insert_video(sample_video)
-
-    sample_channel = ("1", "UC123456789", "Example Channel", 1)
-    insert_channel(sample_channel)
-
-    print("Videos on 2025-01-08:", fetch_videos_by_date("2025-01-08"))
-    print("All videos:", fetch_all_videos())
-    print("All channels:", fetch_all_channels())
-    print("Active channel:", fetch_active_channel())
