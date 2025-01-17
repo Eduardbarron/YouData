@@ -103,9 +103,18 @@ def generate_table(data, columns, summary=False):
     from tabulate import tabulate  # Optional library for pretty tables
 
     if summary:
-        print(f"Total videos: {len(data)}")
-        print(f"Average Views: {sum(row[4] for row in data) / len(data):.2f}")
-        print(f"Average Likes: {sum(row[5] for row in data) / len(data):.2f}")
+        print(f"\nTotal videos: {len(data)}")
+        print(f"Average Views: {sum(row[2] for row in data) / len(data):.2f}")
+        # Ensure likes are summed correctly
+        try:
+            avg_likes = sum(row[3] for row in data if isinstance(row[3], (int, float))) / len(data)
+            print(f"Average Likes: {avg_likes:.2f}")
+        except (ValueError, ZeroDivisionError) as e:
+            print(f"Error calculating average likes: {e}")
 
+    # Sort the data by views in descending order (assuming column 2 contains views)
+    data = sorted(data, key=lambda x: x[2], reverse=True)
+
+    # Extract and print the requested columns in a tabular format
     table = [tuple(row[i] for i in columns) for row in data]
     print(tabulate(table, headers=["ID", "Title", "Views"], tablefmt="pretty"))
