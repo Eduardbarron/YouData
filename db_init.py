@@ -28,6 +28,7 @@ def initialize_database():
         description TEXT,              -- Description of the video
         thumbnail TEXT,                 -- URL of the thumbnail
         channel TEXT                  -- Channel name
+        youtube_id TEXT
     )
     ''')
 

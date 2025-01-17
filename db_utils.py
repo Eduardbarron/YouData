@@ -5,30 +5,49 @@ DB_PATH = "youdata.db"
 def insert_video(video_data):
     """
     Inserts a video record into the database.
-    video_data: Tuple (id, name, views, likes, comments, publication_date, publication_hour, description, thumbnail, channel)
+    video_data: Tuple (id, name, views, likes, comments, publication_date, publication_hour, description, thumbnail, channel, youtube_id)
     """
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
     cursor.execute('''
-    INSERT OR IGNORE INTO videos (id, name, views, likes, comments, publication_date, publication_hour, description, thumbnail, channel)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT OR IGNORE INTO videos (id, name, views, likes, comments, publication_date, publication_hour, description, thumbnail, channel, youtube_id)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     ''', video_data)
     conn.commit()
     conn.close()
 
-def fetch_videos_by_date(publication_date):
+def fetch_videos_by_date(publication_date, youtube_id):
     """
-    Fetches all videos published on a specific date.
+    Fetches all videos published on a specific date for the active channel.
     publication_date: Date in the format "YYYY-MM-DD".
+    youtube_id: YouTube ID of the active channel.
     Returns a list of tuples containing video data.
     """
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
-    cursor.execute('SELECT * FROM videos WHERE publication_date = ?', (publication_date,))
+    cursor.execute('''
+    SELECT * FROM videos 
+    WHERE publication_date = ? AND youtube_id = ?
+    ''', (publication_date, youtube_id))
     results = cursor.fetchall()
     conn.close()
     return results
 
+def fetch_all_videos(youtube_id):
+    """
+    Fetches all video records for the active channel.
+    youtube_id: YouTube ID of the active channel.
+    Returns a list of tuples containing all video data.
+    """
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute('''
+    SELECT * FROM videos 
+    WHERE youtube_id = ?
+    ''', (youtube_id,))
+    results = cursor.fetchall()
+    conn.close()
+    return results
 
 def insert_channel(channel_data):
     """
@@ -79,3 +98,34 @@ def fetch_active_channel():
     conn.close()
     return result
 
+def delete_channel(channel_id):
+    """
+    Deletes a channel and all associated videos from the database.
+    """
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    try:
+        # Delete videos associated with the channel
+        cursor.execute('DELETE FROM videos WHERE youtube_id = (SELECT youtube_id FROM channels WHERE channel_id = ?)', (channel_id,))
+        # Delete the channel itself
+        cursor.execute('DELETE FROM channels WHERE channel_id = ?', (channel_id,))
+        conn.commit()
+        print("Channel and its associated data deleted successfully.")
+    except Exception as e:
+        print(f"An error occurred while deleting the channel: {e}")
+    finally:
+        conn.close()
+
+
+if __name__ == "__main__":
+    # Example usage of the functions
+    sample_video = ("12345", "Sample Video", 1000, 100, 50, "2025-01-08", "12:00", "This is a description", "https://example.com/thumbnail.jpg", "Sample Channel", "UC123456789")
+    insert_video(sample_video)
+
+    sample_channel = ("1", "UC123456789", "Example Channel", 1)
+    insert_channel(sample_channel)
+
+    print("Videos on 2025-01-08:", fetch_videos_by_date("2025-01-08", "UC123456789"))
+    print("All videos for channel 'UC123456789':", fetch_all_videos("UC123456789"))
+    print("All channels:", fetch_all_channels())
+    print("Active channel:", fetch_active_channel())
