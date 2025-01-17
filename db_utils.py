@@ -1,6 +1,7 @@
 import sqlite3
+import os
 
-DB_PATH = "youdata.db"
+DB_PATH = os.path.expanduser("~/code_workspace/youdata/youdata.db")
 
 def insert_video(video_data):
     """

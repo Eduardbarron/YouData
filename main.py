@@ -96,10 +96,10 @@ def generate_report(date):
     videos = fetch_videos_by_date(date, youtube_id)
 
     if videos:
-        # Create a DataFrame from the database results
-        columns = ["ID", "Title", "Views", "Likes", "Comments", "Publication Date", "Publication Hour", "Description", "Thumbnail", "Channel"]
+        # Updated columns to match the data structure
+        columns = ["ID", "Title", "Views", "Likes", "Comments", "Publication Date", "Publication Hour", "Description", "Thumbnail", "Channel", "YouTube ID"]
         df = pd.DataFrame(videos, columns=columns)
-        df = df.sort_values(by="Views", ascending=False).head(10)
+        df = df.sort_values(by="Views", ascending=False).head(500) #expand this limit as much as you need
 
         file_name = f"top_videos_{date}.xlsx"
         df.to_excel(file_name, index=False)
