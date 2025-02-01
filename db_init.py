@@ -27,7 +27,7 @@ def initialize_database():
         publication_hour TEXT,         -- Publication hour of the video
         description TEXT,              -- Description of the video
         thumbnail TEXT,                 -- URL of the thumbnail
-        channel TEXT                  -- Channel name
+        channel TEXT,                  -- Channel name
         youtube_id TEXT
     )
     ''')
