@@ -3,9 +3,11 @@ import pandas as pd
 from datetime import datetime, timedelta
 import sqlite3
 from pytz import timezone
-from utils import select_time_frame, generate_table
+from utils import select_time_frame, generate_table, extract_keywords_from_titles, LATAM_SPANISH_STOPWORDS
 from db_utils import insert_video, delete_channel, fetch_videos_by_date, fetch_all_videos, insert_channel, fetch_all_channels, set_active_channel, fetch_active_channel
 import os
+from collections import Counter
+import re
 
 LOCAL_TIMEZONE = timezone('America/Phoenix')
 
@@ -185,6 +187,40 @@ def configure_channel():
         else:
             print("Invalid choice. Please try again.")
 
+def display_today_top_videos():
+    """
+    Fetches and displays the top 10 videos from the day before, ranked by total views.
+    """
+    today = datetime.now().strftime("%Y-%m-%d")
+    active_channel = fetch_active_channel()
+
+    # Ensure there's an active channel
+    if not active_channel:
+        print("\nNo active channel. Please configure a channel.")
+        input("\nPress Enter to return to the main menu...")
+        return
+
+    youtube_id = active_channel[1]  # Fetch active channel's YouTube ID
+    videos = fetch_videos_by_date(today, youtube_id)
+
+    # Ensure videos exist for the day before 
+    if not videos:
+        print("\nNo data for today . Please download data first.")
+        return
+
+    # Sort videos by total views
+    ranked_videos = sorted(videos, key=lambda x: x[2], reverse=True)  # x[2] is `views`
+
+    # Display the top 10 videos
+    print(f"\n🚀 Top 10 Videos from TODAY by Total Views: {today}")
+    print()
+    for idx, video in enumerate(ranked_videos[:10], start=1):
+        print(f"{idx}. {video[1]} - {video[2]} views")  # video[1] is title, video[2] is views
+    
+    keywords = extract_keywords_from_titles(ranked_videos[:10])
+    keyword_line = ", ".join([f"{word} ({freq})" for word, freq in keywords])
+    print(f"\nTrending Keywords: {keyword_line}")
+
 def display_day_before_top_videos():
     """
     Fetches and displays the top 10 videos from the day before, ranked by total views.
@@ -210,10 +246,14 @@ def display_day_before_top_videos():
     ranked_videos = sorted(videos, key=lambda x: x[2], reverse=True)  # x[2] is `views`
 
     # Display the top 10 videos
-    print(f"\n🚀 Top 10 Videos from 1 day ago by Total Views: {one_days_ago}")
+    print(f"\n🚀🚀 Top 10 Videos from Yesterday by Total Views: {one_days_ago}")
     print()
     for idx, video in enumerate(ranked_videos[:10], start=1):
         print(f"{idx}. {video[1]} - {video[2]} views")  # video[1] is title, video[2] is views
+    
+    keywords = extract_keywords_from_titles(ranked_videos[:10])
+    keyword_line = ", ".join([f"{word} ({freq})" for word, freq in keywords])
+    print(f"\nTrending Keywords: {keyword_line}")
 
 def display_day_before_yesterday_top_videos():
     """
@@ -239,10 +279,13 @@ def display_day_before_yesterday_top_videos():
     ranked_videos = sorted(videos, key=lambda x: x[2], reverse=True)  # x[2] is `views`
 
     # Display the top 10 videos
-    print(f"\n🚀 Top 10 Videos from 2 days ago: {two_days_ago}")
+    print(f"\n🚀🚀🚀 Top 10 Videos from 2 days ago: {two_days_ago}")
     print()
     for idx, video in enumerate(ranked_videos[:10], start=1):
         print(f"{idx}. {video[1]} - {video[2]} views")  # video[1] is title, video[2] is views
+    keywords = extract_keywords_from_titles(ranked_videos[:10])
+    keyword_line = ", ".join([f"{word} ({freq})" for word, freq in keywords])
+    print(f"\nTrending Keywords: {keyword_line}")
 
 
 def main():
@@ -260,6 +303,7 @@ def main():
         else:
             print("\nNo active channel. Please configure a channel.")
 
+        display_today_top_videos()
         display_day_before_top_videos()
         display_day_before_yesterday_top_videos()
 

@@ -1,4 +1,40 @@
 from datetime import datetime, timedelta
+from collections import Counter
+import re
+
+LATAM_SPANISH_STOPWORDS = set([
+    "de", "la", "que", "el", "en", "y", "a", "los", "del", "se", "las",
+    "por", "un", "para", "con", "no", "una", "su", "al", "lo", "como", "más",
+    "pero", "sus", "le", "ya", "o", "este", "sí", "porque", "esta", "entre",
+    "cuando", "muy", "sin", "sobre", "también", "me", "hasta", "hay", "donde",
+    "quien", "desde", "todo", "nos", "durante", "todos", "uno", "les", "ni",
+    "contra", "otros", "ese", "eso", "ante", "ellos", "e", "esto", "mí", "antes",
+    "algunos", "qué", "unos", "yo", "otro", "otras", "otra", "él", "tanto",
+    "esa", "estos", "mucho", "quienes", "nada", "muchos", "cual", "poco",
+    "ella", "estar", "estas", "algunas", "algo", "nosotros", "mi", "mis",
+    "tú", "te", "ti", "tu", "tus", "ellas", "nosotras", "ustedes", "vosotros",
+    "vosotras", "os", "mío", "mía", "míos", "mías", "tuyo", "tuya",
+    "tuyos", "tuyas", "suyo", "suya", "suyos", "suyas", "nuestro", "nuestra",
+    "nuestros", "nuestras", "vuestro", "vuestra", "vuestros", "vuestras",
+    "esos", "esas", "estoy", "estás", "está", "estamos", "están", "andan",
+    "andan", "anda", "andamos", "andás", "andan", "así", "entonces", "pues"
+])
+
+def extract_keywords_from_titles(videos, top_n=10):
+    all_words = []
+
+    for video in videos:
+        title = video[1]  # Assuming index 1 is title
+        title = title.lower()
+        words = re.findall(r"\b[a-záéíóúñü]+\b", title)
+        words = [word for word in words if word not in LATAM_SPANISH_STOPWORDS]
+        all_words.extend(words)
+
+    counter = Counter(all_words)
+    return counter.most_common(top_n)
+
+
+
 
 def select_time_frame():
     """
@@ -103,6 +139,9 @@ def generate_table(data, columns, summary=False):
     from tabulate import tabulate  # Optional library for pretty tables
 
     if summary:
+        keywords = extract_keywords_from_titles(data[:3000])
+        keyword_line = ", ".join([f"{word} ({freq})" for word, freq in keywords])
+        print(f"\nTrending Keywords: {keyword_line}")
         print(f"\nTotal videos: {len(data)}")
         print(f"Average Views: {sum(row[2] for row in data) / len(data):.2f}")
         # Ensure likes are summed correctly
