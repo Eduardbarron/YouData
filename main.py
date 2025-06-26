@@ -212,14 +212,14 @@ def display_today_top_videos():
     ranked_videos = sorted(videos, key=lambda x: x[2], reverse=True)  # x[2] is `views`
 
     # Display the top 10 videos
-    print(f"\n🚀 Top 10 Videos from TODAY by Total Views: {today}")
+    print(f"\n \033[94mTop 10 Videos from TODAY by Total Views:\033[0m {today}")
     print()
     for idx, video in enumerate(ranked_videos[:10], start=1):
-        print(f"{idx}. {video[1]} - {video[2]} views")  # video[1] is title, video[2] is views
+        print(f"{idx}. {video[1]} - \033[93m{video[2]} views\033[0m")  # video[1] is title, video[2] is views
     
     keywords = extract_keywords_from_titles(ranked_videos[:10])
     keyword_line = ", ".join([f"{word} ({freq})" for word, freq in keywords])
-    print(f"\nTrending Keywords: {keyword_line}")
+    print(f"\n\033[92mTrending Keywords: {keyword_line}\033[0m")
 
 def display_day_before_top_videos():
     """
@@ -246,14 +246,14 @@ def display_day_before_top_videos():
     ranked_videos = sorted(videos, key=lambda x: x[2], reverse=True)  # x[2] is `views`
 
     # Display the top 10 videos
-    print(f"\n🚀🚀 Top 10 Videos from Yesterday by Total Views: {one_days_ago}")
+    print(f"\n \033[94mTop 10 Videos from Yesterday by Total Views: \033[0m{one_days_ago}")
     print()
     for idx, video in enumerate(ranked_videos[:10], start=1):
-        print(f"{idx}. {video[1]} - {video[2]} views")  # video[1] is title, video[2] is views
+        print(f"{idx}. {video[1]} - \033[93m{video[2]} views\033[0m")  # video[1] is title, video[2] is views
     
     keywords = extract_keywords_from_titles(ranked_videos[:10])
     keyword_line = ", ".join([f"{word} ({freq})" for word, freq in keywords])
-    print(f"\nTrending Keywords: {keyword_line}")
+    print(f"\n\033[92mTrending Keywords: {keyword_line}\033[0m")
 
 def display_day_before_yesterday_top_videos():
     """
@@ -279,13 +279,13 @@ def display_day_before_yesterday_top_videos():
     ranked_videos = sorted(videos, key=lambda x: x[2], reverse=True)  # x[2] is `views`
 
     # Display the top 10 videos
-    print(f"\n🚀🚀🚀 Top 10 Videos from 2 days ago: {two_days_ago}")
+    print(f"\n \033[94mTop 10 Videos from 2 days ago:\033[0m {two_days_ago}")
     print()
     for idx, video in enumerate(ranked_videos[:10], start=1):
-        print(f"{idx}. {video[1]} - {video[2]} views")  # video[1] is title, video[2] is views
+        print(f"{idx}. {video[1]} - \033[93m{video[2]} views\033[0m")  # video[1] is title, video[2] is views
     keywords = extract_keywords_from_titles(ranked_videos[:10])
     keyword_line = ", ".join([f"{word} ({freq})" for word, freq in keywords])
-    print(f"\nTrending Keywords: {keyword_line}")
+    print(f"\n\033[92mTrending Keywords: {keyword_line}\033[0m")
 
 
 def main():
@@ -295,7 +295,7 @@ def main():
         os.system('cls' if os.name == 'nt' else 'clear')
             
         today = datetime.now().strftime("%Y-%m-%d")
-        print(f"\n📊 Welcome to YouData! Today is {today}.")
+        print(f"\n📊 \033[91mWelcome to YouData! Today is\033[0m {today}.")
 
         active_channel = fetch_active_channel()
         if active_channel:
