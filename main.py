@@ -5,6 +5,7 @@ import sqlite3
 from pytz import timezone
 from utils import select_time_frame, generate_table
 from db_utils import insert_video, delete_channel, fetch_videos_by_date, fetch_all_videos, insert_channel, fetch_all_channels, set_active_channel, fetch_active_channel
+import os
 
 LOCAL_TIMEZONE = timezone('America/Phoenix')
 
@@ -78,8 +79,12 @@ def download_data(youtube_id):
             print(f"Downloading data for {date}...")
             fetch_and_store_videos(youtube_id, date)
         print("Download complete.")
+        input("\nPress Enter to return to the main menu...")
+        
     else:
         print("No valid dates selected. Returning to main menu.")
+        input("\nPress Enter to return to the main menu...")
+
 
 
 def generate_report(date):
@@ -90,6 +95,7 @@ def generate_report(date):
     active_channel = fetch_active_channel()
     if not active_channel:
         print("No active channel. Please configure a channel.")
+        input("\nPress Enter to return to the main menu...")
         return
 
     youtube_id = active_channel[1]
@@ -104,8 +110,10 @@ def generate_report(date):
         file_name = f"top_videos_{date}.xlsx"
         df.to_excel(file_name, index=False)
         print(f"Report generated: {file_name}")
+        input("\nPress Enter to return to the main menu...")
     else:
         print("No videos found in the database for the specified date.")
+        input("\nPress Enter to return to the main menu...")
 
 
 def configure_channel():
@@ -136,6 +144,7 @@ def configure_channel():
                     print(f"{idx}. {channel[2]} (ID: {channel[0]})")
             else:
                 print("No channels found.")
+                input("\nPress Enter to return to the main menu...")
 
         elif choice == "3":
             channels = fetch_all_channels()
@@ -151,6 +160,7 @@ def configure_channel():
                     print("Invalid selection.")
             else:
                 print("No channels available. Please add a channel first.")
+                input("\nPress Enter to return to the main menu...")
 
         elif choice == "4":
             channels = fetch_all_channels()
@@ -175,6 +185,35 @@ def configure_channel():
         else:
             print("Invalid choice. Please try again.")
 
+def display_day_before_top_videos():
+    """
+    Fetches and displays the top 10 videos from the day before, ranked by total views.
+    """
+    one_days_ago = (datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d")
+    active_channel = fetch_active_channel()
+
+    # Ensure there's an active channel
+    if not active_channel:
+        print("\nNo active channel. Please configure a channel.")
+        input("\nPress Enter to return to the main menu...")
+        return
+
+    youtube_id = active_channel[1]  # Fetch active channel's YouTube ID
+    videos = fetch_videos_by_date(one_days_ago, youtube_id)
+
+    # Ensure videos exist for the day before 
+    if not videos:
+        print("\nNo data for yesterday . Please download data first.")
+        return
+
+    # Sort videos by total views
+    ranked_videos = sorted(videos, key=lambda x: x[2], reverse=True)  # x[2] is `views`
+
+    # Display the top 10 videos
+    print(f"\n🚀 Top 10 Videos from 1 day ago by Total Views: {one_days_ago}")
+    print()
+    for idx, video in enumerate(ranked_videos[:10], start=1):
+        print(f"{idx}. {video[1]} - {video[2]} views")  # video[1] is title, video[2] is views
 
 def display_day_before_yesterday_top_videos():
     """
@@ -200,7 +239,7 @@ def display_day_before_yesterday_top_videos():
     ranked_videos = sorted(videos, key=lambda x: x[2], reverse=True)  # x[2] is `views`
 
     # Display the top 10 videos
-    print("\n🚀 Top 10 Videos from the Day Before Yesterday by Total Views:")
+    print(f"\n🚀 Top 10 Videos from 2 days ago: {two_days_ago}")
     print()
     for idx, video in enumerate(ranked_videos[:10], start=1):
         print(f"{idx}. {video[1]} - {video[2]} views")  # video[1] is title, video[2] is views
@@ -209,16 +248,19 @@ def display_day_before_yesterday_top_videos():
 def main():
 
     while True:
+
+        os.system('cls' if os.name == 'nt' else 'clear')
             
         today = datetime.now().strftime("%Y-%m-%d")
         print(f"\n📊 Welcome to YouData! Today is {today}.")
 
         active_channel = fetch_active_channel()
         if active_channel:
-            print(f"\n🎥Active Channel: {active_channel[2]} (YouTube ID: {active_channel[1]})")
+            print(f"\n🎥 Active Channel: {active_channel[2]} (YouTube ID: {active_channel[1]})")
         else:
             print("\nNo active channel. Please configure a channel.")
 
+        display_day_before_top_videos()
         display_day_before_yesterday_top_videos()
 
         print("\n🤖 YouData - Main Menu")

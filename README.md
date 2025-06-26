@@ -112,6 +112,7 @@ The **YouTube API** provides timestamps in UTC, but users needed local timestamp
 - **Automated Scheduling**: Run data collection at set intervals.
 - **Advanced Visualizations**: Use `matplotlib` for graphical insights.
 - **Trend Prediction**: Use **machine learning** to forecast future video performance.
+-**table generation** it must be hable to retrieve many days in the same excel
 
 ## Conclusion
 

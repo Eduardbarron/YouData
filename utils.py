@@ -118,3 +118,4 @@ def generate_table(data, columns, summary=False):
     # Extract and print the requested columns in a tabular format
     table = [tuple(row[i] for i in columns) for row in data]
     print(tabulate(table, headers=["ID", "Title", "Views"], tablefmt="pretty"))
+    input("\nPress Enter to return to the main menu...")
