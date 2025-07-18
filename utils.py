@@ -130,7 +130,7 @@ def select_time_frame():
             return [(start + timedelta(days=i)).strftime("%Y-%m-%d") for i in range((end - start).days + 1)]
 
     print("Invalid choice. Please try again.")
-    return []
+    return  []
 
 def generate_table(data, columns, summary=False):
     """
@@ -141,13 +141,14 @@ def generate_table(data, columns, summary=False):
     if summary:
         keywords = extract_keywords_from_titles(data[:3000])
         keyword_line = ", ".join([f"{word} ({freq})" for word, freq in keywords])
-        print(f"\nTrending Keywords: {keyword_line}")
-        print(f"\nTotal videos: {len(data)}")
-        print(f"Average Views: {sum(row[2] for row in data) / len(data):.2f}")
+        print(f"\n\033[93m***REPORT***\033[0m")
+        print(f"\n\033[96mTrending Keywords:\033[0m {keyword_line}")
+        print(f"\n\033[91mTotal videos:\033[0m  {len(data)}")
+        print(f"\033[91mAverage Views:\033[0m  {sum(row[2] for row in data) / len(data):.2f}")
         # Ensure likes are summed correctly
         try:
             avg_likes = sum(row[3] for row in data if isinstance(row[3], (int, float))) / len(data)
-            print(f"Average Likes: {avg_likes:.2f}")
+            print(f"\033[91mAverage Likes:\033[0m  {avg_likes:.2f}")
         except (ValueError, ZeroDivisionError) as e:
             print(f"Error calculating average likes: {e}")
 
@@ -156,5 +157,5 @@ def generate_table(data, columns, summary=False):
 
     # Extract and print the requested columns in a tabular format
     table = [tuple(row[i] for i in columns) for row in data]
-    print(tabulate(table, headers=["ID", "Title", "Views"], tablefmt="pretty"))
+    print(tabulate(table, headers=["\033[94mDate", "Title", "Views\033[0m"], tablefmt="pretty"))
     input("\nPress Enter to return to the main menu...")

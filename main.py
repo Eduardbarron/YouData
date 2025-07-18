@@ -107,15 +107,16 @@ def generate_report(date):
         # Updated columns to match the data structure
         columns = ["ID", "Title", "Views", "Likes", "Comments", "Publication Date", "Publication Hour", "Description", "Thumbnail", "Channel", "YouTube ID"]
         df = pd.DataFrame(videos, columns=columns)
-        df = df.sort_values(by="Views", ascending=False).head(500) #expand this limit as much as you need
+        df = df.sort_values(by="Views", ascending=False).head(5000) #expand this limit as much as you need
 
         file_name = f"top_videos_{date}.xlsx"
         df.to_excel(file_name, index=False)
         print(f"Report generated: {file_name}")
-        input("\nPress Enter to return to the main menu...")
     else:
         print("No videos found in the database for the specified date.")
-        input("\nPress Enter to return to the main menu...")
+        input("\nPress Enter to return to the main menu...") 
+        
+    
 
 
 def configure_channel():
@@ -212,14 +213,14 @@ def display_today_top_videos():
     ranked_videos = sorted(videos, key=lambda x: x[2], reverse=True)  # x[2] is `views`
 
     # Display the top 10 videos
-    print(f"\n \033[94mTop 10 Videos from TODAY by Total Views:\033[0m {today}")
+    print(f"\n \033[93mTop 10 Videos from TODAY by Total Views:\033[0m {today}")
     print()
     for idx, video in enumerate(ranked_videos[:10], start=1):
-        print(f"{idx}. {video[1]} - \033[93m{video[2]} views\033[0m")  # video[1] is title, video[2] is views
+        print(f"{idx}. {video[1]} - \033[92m{video[2]} views\033[0m")  # video[1] is title, video[2] is views
     
     keywords = extract_keywords_from_titles(ranked_videos[:10])
     keyword_line = ", ".join([f"{word} ({freq})" for word, freq in keywords])
-    print(f"\n\033[92mTrending Keywords: {keyword_line}\033[0m")
+    print(f"\n\033[96mTrending Keywords: {keyword_line}\033[0m")
 
 def display_day_before_top_videos():
     """
@@ -246,14 +247,14 @@ def display_day_before_top_videos():
     ranked_videos = sorted(videos, key=lambda x: x[2], reverse=True)  # x[2] is `views`
 
     # Display the top 10 videos
-    print(f"\n \033[94mTop 10 Videos from Yesterday by Total Views: \033[0m{one_days_ago}")
+    print(f"\n \033[93mTop 10 Videos from Yesterday by Total Views: \033[0m{one_days_ago}")
     print()
     for idx, video in enumerate(ranked_videos[:10], start=1):
-        print(f"{idx}. {video[1]} - \033[93m{video[2]} views\033[0m")  # video[1] is title, video[2] is views
+        print(f"{idx}. {video[1]} - \033[92m{video[2]} views\033[0m")  # video[1] is title, video[2] is views
     
     keywords = extract_keywords_from_titles(ranked_videos[:10])
     keyword_line = ", ".join([f"{word} ({freq})" for word, freq in keywords])
-    print(f"\n\033[92mTrending Keywords: {keyword_line}\033[0m")
+    print(f"\n\033[96mTrending Keywords: {keyword_line}\033[0m")
 
 def display_day_before_yesterday_top_videos():
     """
@@ -279,13 +280,13 @@ def display_day_before_yesterday_top_videos():
     ranked_videos = sorted(videos, key=lambda x: x[2], reverse=True)  # x[2] is `views`
 
     # Display the top 10 videos
-    print(f"\n \033[94mTop 10 Videos from 2 days ago:\033[0m {two_days_ago}")
+    print(f"\n \033[93mTop 10 Videos from 2 days ago:\033[0m {two_days_ago}")
     print()
     for idx, video in enumerate(ranked_videos[:10], start=1):
-        print(f"{idx}. {video[1]} - \033[93m{video[2]} views\033[0m")  # video[1] is title, video[2] is views
+        print(f"{idx}. {video[1]} - \033[92m{video[2]} views\033[0m")  # video[1] is title, video[2] is views
     keywords = extract_keywords_from_titles(ranked_videos[:10])
     keyword_line = ", ".join([f"{word} ({freq})" for word, freq in keywords])
-    print(f"\n\033[92mTrending Keywords: {keyword_line}\033[0m")
+    print(f"\n\033[96mTrending Keywords: {keyword_line}\033[0m")
 
 
 def main():
@@ -299,7 +300,7 @@ def main():
 
         active_channel = fetch_active_channel()
         if active_channel:
-            print(f"\n🎥 Active Channel: {active_channel[2]} (YouTube ID: {active_channel[1]})")
+            print(f"\n🎥 Active Channel: \033[91m{active_channel[2]} \033[0m(YouTube ID: {active_channel[1]})")
         else:
             print("\nNo active channel. Please configure a channel.")
 
@@ -307,7 +308,7 @@ def main():
         display_day_before_top_videos()
         display_day_before_yesterday_top_videos()
 
-        print("\n🤖 YouData - Main Menu")
+        print("\n \033[90m🤖 YouData - Main Menu\033[0m")
         print("\n1. Download Video Data")
         print("2. Consult Top Videos by Date")
         print("3. Generate Excel Report by Date")
@@ -332,7 +333,7 @@ def main():
                         all_videos.extend(videos)
 
                 if all_videos:
-                    generate_table(all_videos, columns=[0, 1, 2], summary=True)
+                    generate_table(all_videos, columns=[5, 1, 2], summary=True)
                 else:
                     print("No videos found for the selected dates.")
             else:
