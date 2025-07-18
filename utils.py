@@ -17,22 +17,26 @@ LATAM_SPANISH_STOPWORDS = set([
     "tuyos", "tuyas", "suyo", "suya", "suyos", "suyas", "nuestro", "nuestra",
     "nuestros", "nuestras", "vuestro", "vuestra", "vuestros", "vuestras",
     "esos", "esas", "estoy", "estás", "está", "estamos", "están", "andan",
-    "andan", "anda", "andamos", "andás", "andan", "así", "entonces", "pues"
+    "andan", "anda", "andamos", "andás", "andan", "así", "es", "entonces", "pues"
 ])
 
-def extract_keywords_from_titles(videos, top_n=10):
+def extract_keywords_from_titles(videos, min_freq=2):
+    """
+    Extracts trending keywords from video titles, filtering out stopwords and
+    ignoring words that appear less than `min_freq` times.
+    Returns all keywords sorted by frequency descending.
+    """
     all_words = []
 
     for video in videos:
-        title = video[1]  # Assuming index 1 is title
-        title = title.lower()
+        title = video[1].lower()
         words = re.findall(r"\b[a-záéíóúñü]+\b", title)
         words = [word for word in words if word not in LATAM_SPANISH_STOPWORDS]
         all_words.extend(words)
 
     counter = Counter(all_words)
-    return counter.most_common(top_n)
-
+    filtered = [(word, freq) for word, freq in counter.items() if freq >= min_freq]
+    return sorted(filtered, key=lambda x: x[1], reverse=True)
 
 
 
@@ -138,11 +142,14 @@ def generate_table(data, columns, summary=False):
     """
     from tabulate import tabulate  # Optional library for pretty tables
 
+    
+
     if summary:
-        keywords = extract_keywords_from_titles(data[:3000])
-        keyword_line = ", ".join([f"{word} ({freq})" for word, freq in keywords])
+        gkeywords = extract_keywords_from_titles(data[:100])
+        gkeyword_line = ", ".join([f"{word} (\033[92m{freq}\033[0m)" for word, freq in gkeywords])
+        keywords = extract_keywords_from_titles(data[:5000])
+        keyword_line = ", ".join([f"{word} (\033[92m{freq}\033[0m)" for word, freq in keywords])
         print(f"\n\033[93m***REPORT***\033[0m")
-        print(f"\n\033[96mTrending Keywords:\033[0m {keyword_line}")
         print(f"\n\033[91mTotal videos:\033[0m  {len(data)}")
         print(f"\033[91mAverage Views:\033[0m  {sum(row[2] for row in data) / len(data):.2f}")
         # Ensure likes are summed correctly
@@ -151,6 +158,9 @@ def generate_table(data, columns, summary=False):
             print(f"\033[91mAverage Likes:\033[0m  {avg_likes:.2f}")
         except (ValueError, ZeroDivisionError) as e:
             print(f"Error calculating average likes: {e}")
+        print(f"\n\033[96m⭐ Golden Keywords:\033[0m {gkeyword_line}")
+        print(f"\n\033[96m📈 Trending Keywords:\033[0m {keyword_line}")
+
 
     # Sort the data by views in descending order (assuming column 2 contains views)
     data = sorted(data, key=lambda x: x[2], reverse=True)
@@ -159,3 +169,4 @@ def generate_table(data, columns, summary=False):
     table = [tuple(row[i] for i in columns) for row in data]
     print(tabulate(table, headers=["\033[94mDate", "Title", "Views\033[0m"], tablefmt="pretty"))
     input("\nPress Enter to return to the main menu...")
+    
