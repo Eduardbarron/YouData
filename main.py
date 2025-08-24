@@ -6,16 +6,18 @@ from pytz import timezone
 from utils import select_time_frame, generate_table, extract_keywords_from_titles, LATAM_SPANISH_STOPWORDS
 from db_utils import insert_video, delete_channel, fetch_videos_by_date, fetch_all_videos, insert_channel, fetch_all_channels, set_active_channel, fetch_active_channel
 import os
+from dotenv import load_dotenv
 from collections import Counter
 import re
 
-LOCAL_TIMEZONE = timezone('America/Phoenix')
+LOCAL_TIMEZONE = timezone('America/Phoenix') #change to your own timezone
+load_dotenv()
 
 def fetch_and_store_videos(youtube_id, date):
     """
     Fetches videos from the given channel for a specific date and stores them in the database.
     """
-    API_KEY = "AIzaSyCLLrmj7wz7_HqdfXIsGc1C51Ci0UFq0QQ"
+    API_KEY = os.getenv("YOUTUBE_API_KEY")
     YOUTUBE_API_SERVICE_NAME = "youtube"
     YOUTUBE_API_VERSION = "v3"
 
